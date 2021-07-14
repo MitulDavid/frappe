@@ -39,6 +39,15 @@ class SystemSettings(Document):
 			not cint(frappe.db.get_single_value("System Settings", "force_user_to_reset_password"))):
 			frappe.flags.update_last_reset_password_date = True
 
+		if self.max_width_after_optimization < 100:
+			frappe.throw('Max width should be greater than or equal to 100')
+
+		if self.max_height_after_optimization < 100:
+			frappe.throw('Max height should be greater than or equal to 100')
+
+		if self.quality_after_optimization < 0 or self.quality_after_optimization > 100:
+			frappe.throw('Quality should be between 0 and 100')
+
 	def on_update(self):
 		for df in self.meta.get("fields"):
 			if df.fieldtype not in no_value_fields and self.has_value_changed(df.fieldname):

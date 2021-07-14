@@ -66,6 +66,11 @@
   "prepared_report_section",
   "enable_prepared_report_auto_deletion",
   "prepared_report_expiry_period",
+  "image_optimization_section",
+  "max_width_after_optimization",
+  "max_height_after_optimization",
+  "quality_after_optimization",
+  "use_optimal_encoder_settings",
   "chat",
   "enable_chat"
  ],
@@ -469,6 +474,36 @@
    "fieldname": "strip_exif_metadata_from_uploaded_images",
    "fieldtype": "Check",
    "label": "Strip EXIF tags from uploaded images"
+  },
+  {
+    "collapsible": 1,
+    "fieldname": "image_optimization_section",
+    "fieldtype": "Section Break",
+    "label": "Image Optimization"
+  },
+  {
+    "default": "1920",
+    "fieldname": "max_width_after_optimization",
+    "fieldtype": "Int",
+    "label": "Max width after optimization (in px)"
+  },
+  {
+    "default": "1080",
+    "fieldname": "max_height_after_optimization",
+    "fieldtype": "Int",
+    "label": "Max height after optimization (in px)"
+  },
+  {
+    "default": "85",
+    "fieldname": "quality_after_optimization",
+    "fieldtype": "Int",
+    "label": "Quality after optimization (0-100)"
+  },
+  {
+    "default": "1",
+    "fieldname": "use_optimal_encoder_settings",
+    "fieldtype": "Check",
+    "label": "Use optimal encoder settings"
   }
  ],
  "icon": "fa fa-cog",

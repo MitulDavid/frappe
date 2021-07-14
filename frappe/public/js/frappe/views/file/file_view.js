@@ -169,6 +169,22 @@ frappe.views.FileView = class FileView extends frappe.views.ListView {
 				frappe.file_manager.paste(this.current_folder)
 			)
 			.hide();
+
+		this.$optimize_button = this.page
+			.add_button(__("Optimize Images"), () => {
+				const doc_names = this.get_checked_items().map(item => item.name);
+				frappe.call({
+					method: "frappe.core.doctype.file.file.optimize_checked_images",
+					freeze: true,
+					args: {
+						doc_names: doc_names,
+					}
+				})
+				.then((r) => {
+					this.refresh();
+				});
+			})
+			.hide();
 	}
 
 	set_fields() {
@@ -474,6 +490,7 @@ frappe.views.FileView = class FileView extends frappe.views.ListView {
 	on_row_checked() {
 		super.on_row_checked();
 		this.toggle_cut_paste_buttons();
+		this.$optimize_button.toggle(this.$checks && this.$checks.length > 0);
 	}
 
 	toggle_cut_paste_buttons() {

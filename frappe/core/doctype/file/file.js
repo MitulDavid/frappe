@@ -23,6 +23,20 @@ frappe.ui.form.on("File", "refresh", function(frm) {
 		wrapper.empty();
 	}
 
+	if(!frm.doc.is_folder && is_viewable && frm.doc.file_size > 0){
+		frm.add_custom_button(__('Optimize'), function() {
+			frappe.call({
+				method: "frappe.core.doctype.file.file.optimize_single_image",
+				args: {
+					doc_name: frm.doc.name,
+				},
+				callback: function() {
+					frappe.set_route('List', 'File');
+				}
+			});
+		});
+	}
+
 	if(frm.doc.file_name && frm.doc.file_name.split('.').splice(-1)[0]==='zip') {
 		frm.add_custom_button(__('Unzip'), function() {
 			frappe.call({

@@ -268,6 +268,43 @@ class File(Document):
 		if not self.is_folder:
 			self.add_comment_in_reference_doc('Attachment Removed', _("Removed {0}").format(self.file_name))
 
+	#@todo: handle repeated optimizations
+	#@todo: add scale option
+	def optimize_image(self, width=1920, height=1920, optimize=True, quality=85):
+		'''Optimize image file to reduce file size'''
+		if self.file_url:
+			is_file = self.file_url.startswith("/files") or self.file_url.startswith("/private")
+			if is_file and self.file_size > 0:
+				try:
+					image, filename, extn = get_local_image(self.file_url)
+				except IOError:
+					return
+			else:
+				frappe.msgprint(_(f"{self.name} is not a local image. It cannot be optimized"))
+				return
+
+			original_size = self.file_size
+			size = width, height
+			image.thumbnail(size, Image.LANCZOS)
+
+			file_url = filename + "." + extn
+			if self.is_private:
+				path = os.path.abspath(frappe.get_site_path(file_url.lstrip("/")))
+			else:
+				path = os.path.abspath(frappe.get_site_path("public", file_url.lstrip("/")))
+
+			try:
+				image.save(path, optimize=optimize, quality=quality)
+			except IOError:
+				frappe.msgprint(_(f"Unable to write file format for {path}"))
+				return
+
+			content = self.get_content()
+			if len(content) < original_size:
+				self.file_size = len(content)
+				self.content_hash = get_content_hash(content)
+				self.save()
+
 	def make_thumbnail(self, set_as_thumbnail=True, width=300, height=300, suffix="small", crop=False):
 		if self.file_url:
 			if self.file_url.startswith("/files"):
@@ -929,6 +966,50 @@ def unzip_file(name):
 	files = file_obj.unzip()
 	return len(files)
 
+@frappe.whitelist()
+def optimize_single_image(doc_name):
+	system_settings = frappe.get_doc('System Settings')
+	file_doc = frappe.get_doc('File', doc_name)
+	file_doc.optimize_image(
+		width=system_settings.max_width_after_optimization,
+		height=system_settings.max_height_after_optimization,
+		optimize=system_settings.use_optimal_encoder_settings,
+		quality=system_settings.quality_after_optimization
+	)
+
+@frappe.whitelist()
+def optimize_checked_images():
+	doc_names = sorted(json.loads(frappe.form_dict.get('doc_names')), reverse=True)
+
+	if len(doc_names) > 10:
+		frappe.enqueue('frappe.core.doctype.file.file.optimize_multiple_images',
+			doc_names=doc_names)
+	else:
+		optimize_multiple_images(doc_names)
+
+def optimize_multiple_images(doc_names):
+	system_settings = frappe.get_doc('System Settings')
+	for i, doc_name in enumerate(doc_names):
+		file_doc = frappe.get_doc('File', doc_name)
+		try:
+			file_doc.optimize_image(
+				width=system_settings.max_width_after_optimization,
+				height=system_settings.max_height_after_optimization,
+				optimize=system_settings.use_optimal_encoder_settings,
+				quality=system_settings.quality_after_optimization
+			)
+			if len(doc_names) >= 5: 
+				frappe.publish_realtime(
+					'progress',
+					dict(
+						progress=[i+1, len(doc_names)],
+						title=_('Optimizing Images'),
+						description=doc_name
+					),
+					user=frappe.session.user
+				)
+		except Exception:
+			pass
 
 @frappe.whitelist()
 def get_attached_images(doctype, names):
