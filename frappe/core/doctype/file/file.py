@@ -300,10 +300,9 @@ class File(Document):
 				return
 
 			content = self.get_content()
-			if len(content) < original_size:
-				self.file_size = len(content)
-				self.content_hash = get_content_hash(content)
-				self.save()
+			self.file_size = len(content)
+			self.content_hash = get_content_hash(content)
+			self.save()
 
 	def make_thumbnail(self, set_as_thumbnail=True, width=300, height=300, suffix="small", crop=False):
 		if self.file_url:
