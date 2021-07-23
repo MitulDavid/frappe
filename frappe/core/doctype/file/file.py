@@ -28,7 +28,7 @@ import frappe
 from frappe import _, conf
 from frappe.model.document import Document
 from frappe.utils import call_hook_method, cint, cstr, encode, get_files_path, get_hook_method, random_string, strip
-from frappe.utils.image import strip_exif_data
+from frappe.utils.image import strip_exif_data, optimize_image
 
 class MaxFileSizeReachedError(frappe.ValidationError):
 	pass
@@ -496,6 +496,10 @@ class File(Document):
 			and frappe.get_system_settings("strip_exif_metadata_from_uploaded_images")
 		):
 			self.content = strip_exif_data(self.content, self.content_type)
+		
+		if self.content_type and self.content_type.startswith("image/"):
+			self.content = optimize_image(self.content, self.content_type)
+			self.file_size = len(self.content)
 
 		self.content_hash = get_content_hash(self.content)
 

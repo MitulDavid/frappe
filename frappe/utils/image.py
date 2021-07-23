@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 import os
+from PIL import Image
+import io
 
 def resize_images(path, maxdim=700):
 	from PIL import Image
@@ -26,9 +28,6 @@ def strip_exif_data(content, content_type):
 		Bytes: Stripped image content
 	"""
 
-	from PIL import Image
-	import io
-
 	original_image = Image.open(io.BytesIO(content))
 	output = io.BytesIO()
 
@@ -38,4 +37,19 @@ def strip_exif_data(content, content_type):
 
 	content = output.getvalue()
 
+	return content
+
+def optimize_image(content, content_type, width=1920, height=1080, optimize=True, quality=85):
+	image = Image.open(io.BytesIO(content))
+	image_format = content_type.split('/')[1]
+	size = width, height
+	image.thumbnail(size, Image.LANCZOS)
+
+	output = io.BytesIO()
+	if image_format=='gif':
+		image.save(output, format=image_format, save_all=True, optimize=optimize, quality=quality)
+	else:
+		image.save(output, format=image_format, optimize=optimize, quality=quality)
+
+	content = output.getvalue()
 	return content

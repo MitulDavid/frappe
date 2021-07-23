@@ -40,7 +40,14 @@
 			/>
 			<div v-if="uploaded" v-html="frappe.utils.icon('solid-success', 'lg')"></div>
 			<div v-if="file.failed" v-html="frappe.utils.icon('solid-red', 'lg')"></div>
-			<button v-if="!uploaded && !file.uploading" class="btn" @click="$emit('remove')" v-html="frappe.utils.icon('delete', 'md')"></button>
+			<div class="icon-flex">
+				<button v-if="!uploaded && !file.uploading && is_image && !is_gif" class="btn muted" @click="$emit('toggle_image_cropper')">
+					<svg viewBox="0 0 24 24" height="22" width="22" xmlns="http://www.w3.org/2000/svg">
+						<path d="M21 16h-3V8.56A2.56 2.56 0 0015.44 6H8V3a1 1 0 00-2 0v3H3a1 1 0 000 2h3v7.44A2.56 2.56 0 008.56 18H16v3a1 1 0 002 0v-3h3a1 1 0 000-2zM8.56 16a.56.56 0 01-.56-.56V8h7.44a.56.56 0 01.56.56V16z"></path>
+					</svg>
+				</button>
+				<button v-if="!uploaded && !file.uploading" class="btn muted" @click="$emit('remove')" v-html="frappe.utils.icon('delete', 'md')"></button>
+			</div>
 		</div>
 	</div>
 </template>
@@ -88,6 +95,9 @@ export default {
 		},
 		is_image() {
 			return this.file.file_obj.type.startsWith('image');
+		},
+		is_gif(){
+			return this.file.file_obj.type == 'image/gif';
 		},
 		progress() {
 			let value = Math.round((this.file.progress * 100) / this.file.total);
@@ -172,5 +182,19 @@ export default {
 .file-actions .btn {
 	padding: var(--padding-xs);
 	box-shadow: none;
+}
+
+.icon-flex{
+	display: flex;
+	justify-content: flex-end;
+}
+
+.muted{
+	opacity: 0.5;
+	transition: 0.3s;
+}
+
+.muted:hover{
+	opacity: 1;
 }
 </style>

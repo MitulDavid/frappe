@@ -79,13 +79,14 @@
 			</div>
 		</div>
 		<div class="file-preview-area" v-show="files.length && !show_file_browser && !show_web_link">
-			<div class="file-preview-container">
+			<div class="file-preview-container" v-if="!show_image_cropper"> 
 				<FilePreview
 					v-for="(file, i) in files"
 					:key="file.name"
 					:file="file"
 					@remove="remove_file(file)"
 					@toggle_private="file.private = !file.private"
+					@toggle_image_cropper="toggle_image_cropper(i)"
 				/>
 			</div>
 			<div class="flex align-center" v-if="show_upload_button && currently_uploading === -1">
@@ -105,6 +106,11 @@
 				</div>
 			</div>
 		</div>
+		<ImageCropper
+			v-if="show_image_cropper"
+			:file="files[crop_image_with_index]"
+			@toggle_image_cropper="toggle_image_cropper(-1)"
+		/>
 		<FileBrowser
 			ref="file_browser"
 			v-if="show_file_browser && !disable_file_browser"
@@ -123,6 +129,7 @@ import FilePreview from './FilePreview.vue';
 import FileBrowser from './FileBrowser.vue';
 import WebLink from './WebLink.vue';
 import GoogleDrivePicker from '../../integrations/google_drive_picker';
+import ImageCropper from './ImageCropper.vue';
 
 export default {
 	name: 'FileUploader',
@@ -171,7 +178,8 @@ export default {
 	components: {
 		FilePreview,
 		FileBrowser,
-		WebLink
+		WebLink,
+		ImageCropper
 	},
 	data() {
 		return {
@@ -180,6 +188,8 @@ export default {
 			currently_uploading: -1,
 			show_file_browser: false,
 			show_web_link: false,
+			show_image_cropper: false,
+			crop_image_with_index: -1,
 			allow_take_photo: false,
 			google_drive_settings: {
 				enabled: false
@@ -233,6 +243,16 @@ export default {
 		},
 		remove_file(file) {
 			this.files = this.files.filter(f => f !== file);
+		},
+		toggle_image_cropper(index){
+			if(!this.show_image_cropper){
+				this.crop_image_with_index = index;
+				this.show_image_cropper = true;
+			}
+			else{
+				this.crop_image_with_index = -1;
+				this.show_image_cropper = false;
+			}
 		},
 		toggle_all_private() {
 			let flag;
