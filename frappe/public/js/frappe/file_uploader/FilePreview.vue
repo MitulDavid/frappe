@@ -41,6 +41,7 @@
 			<div v-if="uploaded" v-html="frappe.utils.icon('solid-success', 'lg')"></div>
 			<div v-if="file.failed" v-html="frappe.utils.icon('solid-red', 'lg')"></div>
 			<button v-if="!uploaded && !file.uploading" class="btn" @click="$emit('remove')" v-html="frappe.utils.icon('delete', 'md')"></button>
+            <button v-if="!uploaded && !file.uploading && is_image" class="btn" @click="$emit('toggle_compress')" v-html="to_compress"></button>
 		</div>
 	</div>
 </template>
@@ -83,6 +84,9 @@ export default {
 		is_private() {
 			return this.file.doc ? this.file.doc.is_private : this.file.private;
 		},
+        to_compress() {
+            return frappe.utils.icon(this.file.enable_image_compression ? 'close' : 'collapse');
+        },
 		uploaded() {
 			return this.file.total && this.file.total === this.file.progress && !this.file.failed;
 		},

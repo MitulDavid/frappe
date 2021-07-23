@@ -25,6 +25,7 @@
     "autoprefixer": "^9.8.6",
     "awesomplete": "^1.1.5",
     "bootstrap": "4.5.0",
+    "browser-image-compression": "^1.0.14",
     "cliui": "^7.0.4",
     "cookie": "^0.4.0",
     "cssnano": "^5.0.0",

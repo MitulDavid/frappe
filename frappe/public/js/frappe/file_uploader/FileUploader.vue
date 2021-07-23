@@ -86,6 +86,7 @@
 					:file="file"
 					@remove="remove_file(file)"
 					@toggle_private="file.private = !file.private"
+                    @toggle_compress="file.enable_image_compression = !file.enable_image_compression"
 				/>
 			</div>
 			<div class="flex align-center" v-if="show_upload_button && currently_uploading === -1">
@@ -123,6 +124,7 @@ import FilePreview from './FilePreview.vue';
 import FileBrowser from './FileBrowser.vue';
 import WebLink from './WebLink.vue';
 import GoogleDrivePicker from '../../integrations/google_drive_picker';
+import imageCompression from 'browser-image-compression';
 
 export default {
 	name: 'FileUploader',
@@ -251,23 +253,29 @@ export default {
 			});
 		},
 		add_files(file_array) {
-			let files = Array.from(file_array)
-				.filter(this.check_restrictions)
-				.map(file => {
-					let is_image = file.type.startsWith('image');
-					return {
-						file_obj: file,
-						name: file.name,
-						doc: null,
-						progress: 0,
-						total: 0,
-						failed: false,
-						uploading: false,
-						private: !is_image
-					}
-				});
-			this.files = this.files.concat(files);
-		},
+            frappe.db.get_doc('System Settings').then((doc) => {
+                let files = Array.from(file_array)
+                    .filter(this.check_restrictions)
+                    .map((file) => {
+                        let is_image = file.type.startsWith('image');
+                        return {
+                        file_obj: file,
+                        name: file.name,
+                        doc: null,
+                        progress: 0,
+                        total: 0,
+                        failed: false,
+                        uploading: false,
+                        private: !is_image,
+                        is_image,
+                        enable_image_compression: doc.enable_image_compression,
+                        max_size_after_compression: doc.max_size_after_compression,
+                        max_height_or_width: doc.max_height_or_width,
+                        };
+                    });
+                this.files = this.files.concat(files);
+            });
+        },
 		check_restrictions(file) {
 			let { max_file_size, allowed_file_types } = this.restrictions;
 
@@ -319,7 +327,7 @@ export default {
 			return frappe.run_serially(
 				this.files.map(
 					(file, i) =>
-						() => this.upload_file(file, i)
+						() => this.handle_image_compression(file, i)
 				)
 			);
 		},
@@ -355,6 +363,31 @@ export default {
 			);
 			return Promise.all(promises);
 		},
+        handle_image_compression(file, i) {
+            if (file.is_image && file.enable_image_compression){
+                //set compression options
+                var options = {
+                maxSizeMB: file.max_size_after_compression,
+                maxWidthOrHeight: file.max_height_or_width,
+                useWebWorker: false,
+                };
+                var upload_file_func = this.upload_file;
+                return imageCompression(file.file_obj, options)
+                    .then((compressed_blob) => {
+                        //to convert Blob to File
+                        var compressed_file_obj = new File([compressed_blob], file.name);
+
+                        //update File object and call upload_file
+                        file.file_obj = compressed_file_obj;
+                        return upload_file_func(file, i);
+                    })
+                    .catch(function (error) {
+                        console.log(error.message);
+                    });
+            } 
+            else 
+                return this.upload_file(file, i);
+        },
 		upload_file(file, i) {
 			this.currently_uploading = i;
 

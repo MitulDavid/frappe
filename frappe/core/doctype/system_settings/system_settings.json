@@ -66,6 +66,10 @@
   "prepared_report_section",
   "enable_prepared_report_auto_deletion",
   "prepared_report_expiry_period",
+  "image_compression_section",
+  "enable_image_compression",
+  "max_size_after_compression",
+  "max_height_or_width",
   "chat",
   "enable_chat"
  ],
@@ -455,6 +459,31 @@
    "fieldname": "prepared_report_section",
    "fieldtype": "Section Break",
    "label": "Prepared Report"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "image_compression_section",
+   "fieldtype": "Section Break",
+   "label": "Image Compression"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_image_compression",
+   "fieldtype": "Check",
+  },
+  {
+   "default": "1",
+   "depends_on": "enable_image_compression",
+   "fieldname": "max_size_after_compression",
+   "fieldtype": "Float",
+   "label": "Max File Size After Compression (in MB)"
+  },
+  {
+   "default": "1080",
+   "depends_on": "enable_image_compression",
+   "fieldname": "max_height_or_width",
+   "fieldtype": "Int",
+   "label": "Max Height/Width After Compression (in px)"
   },
   {
    "default": "Frappe",
