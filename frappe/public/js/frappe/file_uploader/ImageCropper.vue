@@ -10,8 +10,8 @@
       </a>
     </div>
     <br /> -->
-    <button class="btn btn-sm margin-right" @click="$emit('toggle_image_cropper')">Back</button>
-    <button class="btn btn-primary btn-sm margin-right" @click="crop_image">Crop</button>
+    <button class="btn btn-sm margin-right" v-if="!attach_doc_image" @click="$emit('toggle_image_cropper')">Back</button>
+    <button class="btn btn-primary btn-sm margin-right" @click="crop_image" v-html="crop_button_text"></button>
     <br />
     <br />
     <div>
@@ -23,7 +23,7 @@
 import Cropper from "cropperjs";
 export default {
   name: "ImageCropper",
-  props: ["file"],
+  props: ["file", "attach_doc_image"],
   data() {
     return {
       src: null,
@@ -37,15 +37,21 @@ export default {
       fr.onload = () => (this.src = fr.result);
       fr.readAsDataURL(this.file.file_obj);
     }
-
+    aspect_ratio = this.attach_doc_image? 1 : NaN;
     this.image = this.$refs.image;
     this.image.onload = () => {
       this.cropper = new Cropper(this.image, {
         zoomable: false,
         scalable: false,
-        viewMode: 1
+        viewMode: 1,
+        aspectRatio: aspect_ratio
       });
     };
+  },
+  computed: {
+    crop_button_text() {
+		return this.attach_doc_image? "Crop and Upload" : "Crop";
+	}
   },
   methods: {
     crop_image() {
@@ -58,6 +64,9 @@ export default {
         });
         this.file.file_obj = cropped_file_obj;
         this.$emit("toggle_image_cropper");
+        if(this.attach_doc_image){
+            this.$emit("upload_after_crop");
+        }
       }, file_type);
     }
   }

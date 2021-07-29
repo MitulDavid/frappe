@@ -15,13 +15,14 @@ export default class FileUploader {
 		allow_multiple,
 		as_dataurl,
 		disable_file_browser,
+		attach_doc_image,
 		frm
 	} = {}) {
 
 		frm && frm.attachments.max_reached(true);
 
 		if (!wrapper) {
-			this.make_dialog();
+			this.make_dialog(attach_doc_image);
 		} else {
 			this.wrapper = wrapper.get ? wrapper.get(0) : wrapper;
 		}
@@ -42,6 +43,8 @@ export default class FileUploader {
 					allow_multiple,
 					as_dataurl,
 					disable_file_browser,
+					attach_doc_image,
+					trigger_upload: false,
 				}
 			})
 		});
@@ -54,6 +57,10 @@ export default class FileUploader {
 				this.dialog.set_secondary_action_label(all_private ? __('Set all public') : __('Set all private'));
 			}
 		}, { deep: true });
+
+		this.uploader.$watch('trigger_upload', () => {
+			this.upload_files();
+		});
 
 		if (files && files.length) {
 			this.uploader.add_files(files);
@@ -68,16 +75,23 @@ export default class FileUploader {
 			});
 	}
 
-	make_dialog() {
-		this.dialog = new frappe.ui.Dialog({
-			title: __('Upload'),
-			primary_action_label: __('Upload'),
-			primary_action: () => this.upload_files(),
-			secondary_action_label: __('Set all private'),
-			secondary_action: () => {
-				this.uploader.toggle_all_private();
-			}
-		});
+	make_dialog(attach_doc_image) {
+		if(attach_doc_image){
+			this.dialog = new frappe.ui.Dialog({
+				title: __('Upload Image'),
+			});
+		}
+		else{
+			this.dialog = new frappe.ui.Dialog({
+				title: __('Upload'),
+				primary_action_label: __('Upload'),
+				primary_action: () => this.upload_files(),
+				secondary_action_label: __('Set all private'),
+				secondary_action: () => {
+					this.uploader.toggle_all_private();
+				}
+			});
+		}
 
 		this.wrapper = this.dialog.body;
 		this.dialog.show();

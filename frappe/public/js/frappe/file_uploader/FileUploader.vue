@@ -46,7 +46,7 @@
 						</svg>
 						<div class="mt-1">{{ __('Library') }}</div>
 					</button>
-					<button class="btn btn-file-upload" @click="show_web_link = true">
+					<button class="btn btn-file-upload" v-if="allow_web_link" @click="show_web_link = true">
 						<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<circle cx="15" cy="15" r="15" fill="#ECAC4B"/>
 							<path d="M12.0469 17.9543L17.9558 12.0454" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
@@ -109,7 +109,9 @@
 		<ImageCropper
 			v-if="show_image_cropper"
 			:file="files[crop_image_with_index]"
+			:attach_doc_image="attach_doc_image"
 			@toggle_image_cropper="toggle_image_cropper(-1)"
+			@upload_after_crop="trigger_upload=true"
 		/>
 		<FileBrowser
 			ref="file_browser"
@@ -171,6 +173,12 @@ export default {
 				allowed_file_types: [] // ['image/*', 'video/*', '.jpg', '.gif', '.pdf']
 			})
 		},
+		attach_doc_image: {
+			default: false
+		},
+		trigger_upload: {
+			default: false
+		},
 		upload_notes: {
 			default: null // "Images or video, upto 2MB"
 		}
@@ -191,6 +199,7 @@ export default {
 			show_image_cropper: false,
 			crop_image_with_index: -1,
 			allow_take_photo: false,
+			allow_web_link: true,
 			google_drive_settings: {
 				enabled: false
 			}
@@ -208,6 +217,12 @@ export default {
 					}
 				}
 			});
+		}
+		if(this.attach_doc_image){
+			this.disable_file_browser = true;
+			this.allow_web_link = false;
+			this.allow_take_photo = false;
+			this.google_drive_settings.enabled = false;
 		}
 	},
 	watch: {
@@ -287,6 +302,9 @@ export default {
 					}
 				});
 			this.files = this.files.concat(files);
+			if(this.attach_doc_image){
+				this.toggle_image_cropper(0);
+			}
 		},
 		check_restrictions(file) {
 			let { max_file_size, allowed_file_types } = this.restrictions;

@@ -4,8 +4,15 @@ frappe.ui.form.ControlAttach = class ControlAttach extends frappe.ui.form.Contro
 		this.$input = $('<button class="btn btn-default btn-sm btn-attach">')
 			.html(__("Attach"))
 			.prependTo(me.input_area)
-			.on("click", function() {
-				me.on_attach_click();
+			.on({
+				click: function() {
+					me.on_attach_click();
+				},
+				attach_doc_image: function() {
+					// console.log('On attach_doc_image');
+					me.on_attach_doc_image();
+				}
+
 			});
 		this.$value = $(
 			`<div class="attached-file flex justify-between align-center">
@@ -51,7 +58,15 @@ frappe.ui.form.ControlAttach = class ControlAttach extends frappe.ui.form.Contro
 		}
 	}
 	on_attach_click() {
+		// console.log('On Attach Click');
 		this.set_upload_options();
+		this.file_uploader = new frappe.ui.FileUploader(this.upload_options);
+	}
+	on_attach_doc_image() {
+		// console.log('On ADI');
+		this.set_upload_options();
+		// this.file_uploader = new frappe.ui.DocImageUploader(this.upload_options);
+		this.upload_options["attach_doc_image"] = true;
 		this.file_uploader = new frappe.ui.FileUploader(this.upload_options);
 	}
 	set_upload_options() {
