@@ -46,10 +46,7 @@ def optimize_image(content, content_type, width=1920, height=1080, optimize=True
 	image.thumbnail(size, Image.LANCZOS)
 
 	output = io.BytesIO()
-	if image_format=='gif':
-		image.save(output, format=image_format, save_all=True, optimize=optimize, quality=quality)
-	else:
-		image.save(output, format=image_format, optimize=optimize, quality=quality)
+	image.save(output, format=image_format, optimize=optimize, quality=quality, save_all=True if image_format=='gif' else None)
 
 	content = output.getvalue()
 	return content

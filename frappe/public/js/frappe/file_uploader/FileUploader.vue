@@ -179,6 +179,9 @@ export default {
 		trigger_upload: {
 			default: false
 		},
+		hide_dialog_footer: {
+			default: false
+		},
 		upload_notes: {
 			default: null // "Images or video, upto 2MB"
 		}
@@ -260,14 +263,9 @@ export default {
 			this.files = this.files.filter(f => f !== file);
 		},
 		toggle_image_cropper(index){
-			if(!this.show_image_cropper){
-				this.crop_image_with_index = index;
-				this.show_image_cropper = true;
-			}
-			else{
-				this.crop_image_with_index = -1;
-				this.show_image_cropper = false;
-			}
+			this.crop_image_with_index = this.show_image_cropper ? -1 : index;
+			this.hide_dialog_footer = !this.show_image_cropper;
+			this.show_image_cropper = !this.show_image_cropper;
 		},
 		toggle_all_private() {
 			let flag;
