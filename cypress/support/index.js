@@ -15,6 +15,7 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
+import '@cypress/code-coverage/support';
 
 
 // Alternatively you can use CommonJS syntax:
@@ -23,3 +24,9 @@ import './commands';
 Cypress.Cookies.defaults({
 	preserve: 'sid'
 });
+
+Cypress.on('uncaught:exception', (err, runnable) => {
+	if (err.message.includes('Filter missing')) {
+	  return false
+	}
+})
