@@ -141,8 +141,10 @@ jobs:
           CYPRESS_RECORD_KEY: 91b84f8a-9bb2-4a24-92aa-fd2e7786ffc5
 
       - name: Upload coverage data
+        if: ${{ steps.check-build.outputs.build == 'strawberry' }}
         uses: codecov/codecov-action@v2
         with:
           name: Cypress
+          fail_ci_if_error: true
           directory: /home/runner/frappe-bench/apps/frappe/.cypress-coverage/
           verbose: true
