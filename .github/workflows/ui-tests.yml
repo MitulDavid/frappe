@@ -131,8 +131,8 @@ jobs:
         run: cd ~/frappe-bench/ && bench build --apps frappe
 
       - name: Check File Existence
-        if: ${{ hashFiles('/home/runner/frappe-bench/apps/frappe/frappe/app.py') != '' }}
-        run: echo "::notice file=app.py::File Exists"
+        if: ${{ hashFiles('frappe/app.py') != '' }}
+        run: echo ${{ hashFiles('frappe/app.py') }}
 
       - name: Site Setup
         if: ${{ steps.check-build.outputs.build == 'strawberry' }}
