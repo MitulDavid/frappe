@@ -131,8 +131,8 @@ jobs:
         run: cd ~/frappe-bench/ && bench build --apps frappe
 
       - name: Check File Existence
-        if: ${{ hashFiles('frappe/app.py') != '' }}
-        run: echo ${{ hashFiles('frappe/app.py') }}
+        if: ${{ hashFiles('.github/stale.yml') != '' }}
+        run: echo ${{ hashFiles('.cypress-coverage/clover.xml') }}
 
       - name: Site Setup
         if: ${{ steps.check-build.outputs.build == 'strawberry' }}
@@ -145,7 +145,7 @@ jobs:
           CYPRESS_RECORD_KEY: 91b84f8a-9bb2-4a24-92aa-fd2e7786ffc5
 
       - name: Upload coverage data
-        if: ${{ hashFiles('/home/runner/frappe-bench/apps/frappe/.cypress-coverage/clover.xml') != '' }}
+        if: ${{ hashFiles('.cypress-coverage/clover.xml') != '' }}
         uses: codecov/codecov-action@v2
         with:
           name: Cypress
