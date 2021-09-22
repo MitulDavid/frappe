@@ -152,5 +152,5 @@ jobs:
         with:
           name: Cypress
           fail_ci_if_error: true
-          directory: /home/runner/frappe-bench/apps/frappe/.cypress-coverage/
+          files: /home/runner/frappe-bench/apps/frappe/.cypress-coverage/clover.xml, /home/runner/frappe-bench/apps/frappe/coverage.xml, /home/runner/frappe-bench/sites/coverage.xml
           verbose: true
