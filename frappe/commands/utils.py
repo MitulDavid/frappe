@@ -638,7 +638,8 @@ def run_ui_tests(context, app, headless=False, parallel=True, with_coverage=Fals
 		formatted_command += f' --ci-build-id {ci_build_id}'
 
 	click.secho("Running Cypress...", fg="yellow")
-	frappe.commands.popen(formatted_command, cwd=app_base_path, raise_err=True)
+	with CodeCoverage(with_coverage, app):
+		frappe.commands.popen(formatted_command, cwd=app_base_path, raise_err=True)
 
 
 @click.command('serve')
