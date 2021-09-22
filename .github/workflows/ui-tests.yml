@@ -141,7 +141,7 @@ jobs:
           CYPRESS_RECORD_KEY: 91b84f8a-9bb2-4a24-92aa-fd2e7786ffc5
 
       - name: Check File Existence
-        if: ${{ steps.check-build.outputs.build == 'strawberry' && test -f /home/runner/frappe-bench/apps/frappe/.cypress-coverage/clover.xml }}
+        if: ${{ steps.check-build.outputs.build == 'strawberry' }}
         run: echo ${{ test -f /home/runner/frappe-bench/apps/frappe/.cypress-coverage/clover.xml }} && echo ${{ hashFiles('**/.cypress-coverage/*') }} && echo ${{ hashFiles('**/.nyc_output/*') }}
         
       - name: Check for coverage file
