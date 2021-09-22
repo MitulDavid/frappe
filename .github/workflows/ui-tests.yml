@@ -142,8 +142,11 @@ jobs:
 
       - name: Check File Existence
         if: ${{ steps.check-build.outputs.build == 'strawberry' }}
-        run: echo ${{ test -f /home/runner/frappe-bench/apps/frappe/.cypress-coverage/clover.xml }} && echo ${{ hashFiles('**/.cypress-coverage/*') }} && echo ${{ hashFiles('**/.nyc_output/*') }}
-        
+        run: echo ${{ hashFiles('**/.cypress-coverage/*') }} && echo ${{ hashFiles('**/.nyc_output/*') }} && echo ${{ hashFiles('**/clover.xml') }}
+      
+      - name: Alternate File Existence Check
+        run: test -f /home/runner/frappe-bench/apps/frappe/.cypress-coverage/clover.xml && echo "::set-output name=test_output::exists" && echo DONE
+
       - name: Check for coverage file
         id: check_coverage
         uses: andstor/file-existence-action@v1
@@ -154,7 +157,7 @@ jobs:
         id: check_file
         uses: andstor/file-existence-action@v1
         with:          
-          files: "/home/runner/frappe-bench/apps/frappe/frapp/app.py"
+          files: "/home/runner/frappe-bench/apps/frappe/frappe/app.py"
 
       - name: Upload Coverage Data
         if: ${{ steps.check-build.outputs.build == 'strawberry' }}
