@@ -140,27 +140,14 @@ jobs:
         env:
           CYPRESS_RECORD_KEY: 91b84f8a-9bb2-4a24-92aa-fd2e7786ffc5
 
-      - name: Check File Existence
-        if: ${{ steps.check-build.outputs.build == 'strawberry' }}
-        run: echo ${{ hashFiles('**/.cypress-coverage/*') }} && echo ${{ hashFiles('**/.nyc_output/*') }} && echo ${{ hashFiles('**/clover.xml') }}
-      
-      - name: Alternate File Existence Check
-        run: test -f /home/runner/frappe-bench/apps/frappe/.cypress-coverage/clover.xml && echo "::set-output name=test_output::exists" && echo DONE
-
-      - name: Check for coverage file
+      - name: Check Coverage
         id: check_coverage
         uses: andstor/file-existence-action@v1
         with:          
           files: "/home/runner/frappe-bench/apps/frappe/.cypress-coverage/clover.xml"
-        
-      - name: Debug
-        id: check_file
-        uses: andstor/file-existence-action@v1
-        with:          
-          files: "/home/runner/frappe-bench/apps/frappe/frappe/app.py"
 
       - name: Upload Coverage Data
-        if: ${{ steps.check-build.outputs.build == 'strawberry' }}
+        if: ${{ steps.check-build.outputs.build == 'strawberry' && steps.check_coverage.outputs.files_exists == 'true'}}
         uses: codecov/codecov-action@v2
         with:
           name: Cypress
