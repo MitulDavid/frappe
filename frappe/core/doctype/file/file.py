@@ -860,6 +860,56 @@ def extract_images_from_html(doc, content):
 
 	return content
 
+def extract_base64_imgs_from_html(content):
+	if content is None or not isinstance(content, str):
+		raise TypeError
+
+	base64_imgs = []
+	match_groups = re.finditer(r'<img[^>]*src\s*=\s*["\'](?=data:)(.*?)["\']', content)
+	for match in match_groups:
+		data = match.group(1)
+		data = data.split("data:")[1]
+		headers, content = data.split(",")
+		mimetype = headers.split(";")[0]
+		if "filename=" in headers:
+			filename = headers.split("filename=")[-1]
+			filename = safe_decode(filename).split(";")[0]
+		else:
+			filename = get_random_filename(content_type=mimetype)
+
+		base64_imgs.append({
+			"filename": filename,
+			"mimetype": mimetype,
+			"content": content
+		}.copy())
+
+	return base64_imgs
+
+def save_extracted_images(base64_imgs, doc, is_private):
+	file_urls = []
+	for img in base64_imgs:
+		doctype = doc.parenttype if doc.parent else doc.doctype
+		name = doc.parent or doc.name
+		_file = frappe.get_doc({
+			"doctype": "File",
+			"file_name": img["filename"],
+			"attached_to_doctype": doctype,
+			"attached_to_name": name,
+			"content": img["content"],
+			"decode": True,
+			"is_private": is_private
+		})
+		_file.save(ignore_permissions=True)
+		_file.optimize_file()
+		file_urls.append(_file.file_url)
+
+	return file_urls
+
+def replace_base64_images_with_fileurl(content, file_urls):
+	if file_urls:
+		img_tags = [f'<img src="{file_url}"' for file_url in file_urls]
+		content = re.sub(r'<img[^>]*src\s*=\s*["\'](?=data:)(.*?)["\']', '{}', content).format(*img_tags)
+	return content
 
 def get_random_filename(content_type=None):
 	extn = None

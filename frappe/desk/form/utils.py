@@ -5,7 +5,7 @@ import frappe, json
 import frappe.desk.form.meta
 import frappe.desk.form.load
 from frappe.desk.form.document_follow import follow_document
-from frappe.core.doctype.file.file import extract_images_from_html
+from frappe.core.doctype.file.file import extract_base64_imgs_from_html, save_extracted_images, replace_base64_images_with_fileurl
 
 from frappe import _
 
@@ -66,7 +66,9 @@ def add_comment(reference_doctype, reference_name, content, comment_email, comme
 		comment_type='Comment',
 		comment_by=comment_by
 	))
-	doc.content = extract_images_from_html(doc, content)
+	base64_imgs = extract_base64_imgs_from_html(content)
+	file_urls = save_extracted_images(base64_imgs, doc, is_private=True)
+	doc.content = replace_base64_images_with_fileurl(content, file_urls)
 	doc.insert(ignore_permissions=True)
 
 	follow_document(doc.reference_doctype, doc.reference_name, frappe.session.user)
